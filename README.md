@@ -109,9 +109,6 @@ Python, missing `ffmpeg`/`yt-dlp`, placeholder `.env`).
 
 ## Environment variables
 
-Per the parent [sampleapps/CLAUDE.md](../CLAUDE.md), B2 keys use the
-canonical names — no `AWS_*`, no `B2_S3_*`.
-
 | Key | Required | Notes |
 |---|---|---|
 | `B2_ENDPOINT` | yes | `https://s3.<region>.backblazeb2.com` |
