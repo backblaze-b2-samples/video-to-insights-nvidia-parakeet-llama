@@ -1,0 +1,58 @@
+[project]
+name = "video-to-insights-pipeline-api"
+version = "0.1.0"
+description = "FastAPI backend for the video-to-insights-pipeline B2 sample"
+requires-python = ">=3.11"
+# Canonical dependency manifest. `requirements.txt` is maintained in parallel
+# so the README's `pip install -r requirements.txt` flow still works for
+# contributors who haven't installed the project as a package; the two lists
+# must stay in sync.
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "boto3>=1.35.0",
+    "httpx>=0.27.0",
+    "yt-dlp>=2026.1.1",
+    "nvidia-riva-client>=2.18.0,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "T20",  # flake8-print (no bare print())
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",   # line length handled by formatter
+    "B008",   # function call in default arg (FastAPI Depends)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
