@@ -4,9 +4,9 @@
 ## Components
 
 - **apps/web/** — Next.js 16 frontend (App Router, Tailwind v4, shadcn/ui).
-  Single `/` route: submit form, status card, video player, insights panel,
-  recent-jobs list. TanStack Query polls the job until it hits a terminal
-  state.
+  Dashboard and job routes: submit form, status card, video player,
+  insights panel, files browser, and B2-backed jobs index. TanStack Query
+  polls active jobs until they hit a terminal state.
 - **services/api/** — FastAPI backend, layered.
   - REST surface for submit / poll / artifact-redirect / cancel.
   - Pipeline orchestrator runs as an asyncio Task guarded by a
@@ -58,7 +58,11 @@ services/api/
       pipeline.py             Orchestrator — wraps all subprocess work in to_thread
     runtime/
       health.py               /health
-      jobs.py                 POST /jobs, GET /jobs/{id}[/source|manifest|...], DELETE /jobs/{id}
+      jobs.py                 POST /jobs; GET /jobs; GET /jobs/latest
+                              GET /jobs/{id}; GET /jobs/{id}/source
+                              GET /jobs/{id}/manifest
+                              GET /jobs/{id}/transcript
+                              GET /jobs/{id}/insights; DELETE /jobs/{id}
   tests/
     test_structure.py         Boundary + size lints
     test_youtube_validate.py  Host allowlist

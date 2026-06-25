@@ -33,8 +33,9 @@ scripts/            doctor.mjs, dev.sh, pick-port.mjs
 **Frontend**:
 - shadcn/ui components in `src/components/ui/` are generated — never modify them.
 - Every API call flows through TanStack Query hooks in `apps/web/src/lib/queries.ts`.
-- Recent-job pointers live in `localStorage` (`apps/web/src/lib/recent-jobs.ts`),
-  not in the API — the API has no list endpoint by design.
+- Dashboard job summaries come from the B2-backed jobs index exposed by
+  `GET /jobs` and `GET /jobs/latest`; the frontend consumes them through
+  `useJobsIndex` and `useLatestJob` in `apps/web/src/lib/queries.ts`.
 
 ## 3. Quality Expectations
 
