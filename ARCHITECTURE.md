@@ -58,7 +58,11 @@ services/api/
       pipeline.py             Orchestrator — wraps all subprocess work in to_thread
     runtime/
       health.py               /health
-      jobs.py                 POST /jobs, GET /jobs[/latest|/{id}/...], DELETE /jobs/{id}
+      jobs.py                 POST /jobs; GET /jobs; GET /jobs/latest
+                              GET /jobs/{id}; GET /jobs/{id}/source
+                              GET /jobs/{id}/manifest
+                              GET /jobs/{id}/transcript
+                              GET /jobs/{id}/insights; DELETE /jobs/{id}
   tests/
     test_structure.py         Boundary + size lints
     test_youtube_validate.py  Host allowlist
