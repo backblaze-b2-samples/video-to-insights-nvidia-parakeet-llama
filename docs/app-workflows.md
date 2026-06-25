@@ -10,8 +10,8 @@
    - Schedules `_run_under_semaphore(job_id)` as an asyncio Task guarded
      by the lifespan semaphore.
    - Returns `{job_id, status: "queued"}`.
-3. Frontend stores `{job_id, source_url, submitted_at}` in localStorage
-   and starts polling `GET /jobs/{job_id}` every 1.5s via TanStack Query.
+3. Frontend routes to `/jobs/{job_id}` and starts polling
+   `GET /jobs/{job_id}` every 1.5s via TanStack Query.
 
 ## Poll until terminal
 
@@ -45,9 +45,9 @@ between stages and exits with `status: "cancelled"`. A subprocess
 already in flight (yt-dlp, ffmpeg) will run to completion before the
 check fires — the README and CODE_REVIEW document that.
 
-## Recent jobs
+## Dashboard jobs index
 
-`<RecentJobsList>` reads `v2i.recent_jobs` from localStorage (max 5
-entries, newest first) and lets the user re-open a previous job's view.
-There is no API list endpoint by design — every job is owned by the
-browser that submitted it.
+Dashboard components read `GET /jobs` through `useJobsIndex` for the
+recent videos table, stats, and activity chart. The "last processed"
+card reads `GET /jobs/latest` through `useLatestJob`. Both endpoints are
+backed by the B2 object `video-to-insights-pipeline/jobs-index.json`.

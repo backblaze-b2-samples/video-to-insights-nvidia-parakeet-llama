@@ -45,8 +45,10 @@ every PR.
 11. All API calls go through `apps/web/src/lib/api-client.ts` and are
     consumed via TanStack hooks in `lib/queries.ts`. No bare `fetch` in
     components.
-12. Recent-job pointers are localStorage-only. The API has no
-    `GET /jobs` list endpoint and should not gain one.
+12. Dashboard recent/previous videos use the B2-backed jobs index exposed
+    by `GET /jobs` and `GET /jobs/latest`. Keep
+    `app/service/jobs_index.py`, `app/runtime/jobs.py`, and
+    `apps/web/src/lib/queries.ts` in sync when changing that flow.
 13. Insight cards seek the player via `videoRef.current.currentTime`.
     Do not regenerate signed URLs per click — the source URL is set
     once at mount.

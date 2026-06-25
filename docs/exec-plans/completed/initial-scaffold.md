@@ -4,6 +4,11 @@
 
 Plan locked through conversation iteration with the user; red-teamed by `feature-dev:code-reviewer` sub-agent; free-tier model availability verified via WebSearch.
 
+Historical note: this plan records the initial scaffold. The current
+implementation later added the B2-backed jobs index exposed by
+`GET /jobs` and `GET /jobs/latest`; use `AGENTS.md` and
+`ARCHITECTURE.md` for current architecture rules.
+
 ---
 
 ## 1. Purpose
@@ -26,7 +31,7 @@ The sample demonstrates: (a) B2 as the system of record for large media + AI-der
 | pytest + ruff + structural test (`tests/test_structure.py`) | All `tests/test_upload_*`, `test_delete*`, `test_download_*`, `test_metadata*` | `tests/test_youtube_validate.py`, `tests/test_ffmpeg_audio.py`, `tests/test_asr_client.py` (with fake NIM client), `tests/test_insights_client.py`, `tests/test_pipeline.py` (faked downloader + fake S3 + fake NIM), `tests/test_job_state.py` |
 | `pnpm dev` / `pnpm dev:api` / `pnpm dev:web` workflow | `infra/railway/` deploy config (out of scope) | `scripts/doctor.mjs` (checks ffmpeg + yt-dlp on PATH, warns if NVIDIA_API_KEY missing) wired to `pnpm doctor` |
 | LICENSE (Apache 2.0), pre-commit hooks, pnpm workspace | Vibe starter README content | New README covering pipeline diagram, env setup (brew/apt for ffmpeg, pip install for yt-dlp), graceful-degradation behavior, free-tier model notes, YouTube ToS disclaimer |
-| Frontend `apiFetch` + TanStack `qk` query-key conventions | Dashboard panels (`StatsCards`, `RecentUploadsTable`, `UploadChart`) | `components/jobs/SubmitForm.tsx`, `JobStatusCard.tsx`, `VideoPlayer.tsx`, `InsightsPanel.tsx`, `RecentJobsList.tsx` (localStorage-backed) |
+| Frontend `apiFetch` + TanStack `qk` query-key conventions | Dashboard panels (`StatsCards`, `RecentUploadsTable`, `UploadChart`) | Job detail components plus B2-index-backed dashboard components (`RecentVideosTable`, `StatsCards`, `ActivityChart`, `LastProcessedCard`) |
 | `packages/shared` for TS↔Python type mirror | — | New shared types: `SubmitRequest`, `JobStatus`, `ManifestV1`, `Insight` |
 | | | **No Docker.** Explicit user decision — keep dev simple, devs use local Python + Node. |
 
@@ -60,7 +65,7 @@ b2://{B2_BUCKET_NAME}/video-to-insights-pipeline/{video_id}/
 ## 4. Key features
 
 1. **Paste-and-play.** Single form labeled "Video URL (YouTube)" + segment-length input (kept though clips are dropped — the field is removed from the UI). One-click submission returns a `job_id` immediately.
-2. **B2 is the system of record for video + AI metadata.** Source MP4 and all AI-derived JSON artifacts (transcript, insights, manifest) live in B2. The frontend only stores `{job_id, source_url}` per recent-job in `localStorage`.
+2. **B2 is the system of record for video + AI metadata.** Source MP4, AI-derived JSON artifacts (transcript, insights, manifest), and the dashboard jobs index live in B2.
 3. **Seekable insight cards.** Clicking an insight card in the right column calls `videoRef.current.currentTime = insight.start_seconds`. Player streams the B2 source over HTTP range requests via a 1-hour presigned URL.
 4. **Graceful degradation without NVIDIA_API_KEY.** Missing or invalid key → pipeline still downloads + uploads source, sets `analysis_status: "skipped_no_api_key"`, returns `status: "done_no_analysis"`. UI renders the video player normally and shows a muted notice instead of the insights panel. The B2 half of the sample is fully usable with B2 credentials alone.
 5. **Cooperative cancellation.** `DELETE /jobs/{id}` sets a `cancel_requested` flag in the state file; pipeline checks it between stages. README documents that a stuck subprocess won't die immediately.
@@ -135,13 +140,15 @@ These are commitments the builder must honor; the reviewer will assert against t
 **API surface (only these endpoints):**
 - `POST /jobs` `{youtube_url, segment_seconds?}` → `{job_id, status: "queued"}`
   - Note: `segment_seconds` is accepted for forward-compat but currently unused (no ffmpeg clip slicing in this MVP). README documents this.
+- `GET /jobs?limit=&offset=` → paginated B2-backed jobs index
+- `GET /jobs/latest` → most recent indexed job, or null
 - `GET /jobs/{id}` → full `JobStatus`
 - `GET /jobs/{id}/source` → 302 to presigned source.mp4 URL (1h)
 - `GET /jobs/{id}/manifest` → 302 to presigned manifest.json URL (1h)
 - `GET /jobs/{id}/transcript` → 302 to presigned transcript.json URL (1h)
 - `GET /jobs/{id}/insights` → 302 to presigned insights.json URL (1h)
 - `DELETE /jobs/{id}` → sets cancel flag; returns updated JobStatus
-- **Cut:** `GET /jobs` list endpoint. Frontend uses localStorage for recent jobs.
+- Dashboard job summaries are read through the B2-backed jobs index.
 
 **`JobStatus` shape:**
 ```jsonc
@@ -207,7 +214,7 @@ Idle:
   │ Video to Insights Pipeline             │
   │ [ Video URL (YouTube) ............ ]   │
   │ [ Run ▶ ]                              │
-  │ Recent jobs (localStorage):            │
+  │ Recent videos (GET /jobs):             │
   │  · f3b4… https://youtube.com/…  done   │
   └────────────────────────────────────────┘
 

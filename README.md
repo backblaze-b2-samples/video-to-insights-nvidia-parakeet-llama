@@ -13,8 +13,8 @@ cards that jump the player to each section.
 ![Video to Insights dashboard](./video-to-insights.png)
 
 B2 is the system of record: the source MP4, the transcript JSON, the
-insights JSON, and a schema-versioned manifest all live in B2. The
-frontend keeps nothing but a list of recent `job_id`s in `localStorage`.
+insights JSON, a schema-versioned manifest, and the dashboard jobs index
+all live in B2. The frontend reads job summaries through the API.
 
 ## Pipeline
 
@@ -51,7 +51,7 @@ Idle:
 │ Video to Insights Pipeline             │
 │ [ Video URL (YouTube) ............ ]   │
 │ [ Run ]                                │
-│ Recent jobs (localStorage):            │
+│ Recent videos (GET /jobs):             │
 │  · f3b4… https://youtube.com/…  done   │
 └────────────────────────────────────────┘
 ```
@@ -128,6 +128,8 @@ Python, missing `ffmpeg`/`yt-dlp`, placeholder `.env`).
 
 ```
 POST   /jobs                     {youtube_url, segment_seconds?} -> {job_id, status}
+GET    /jobs                     paginated dashboard jobs index
+GET    /jobs/latest              most recent indexed job, or null
 GET    /jobs/{id}                full JobStatus
 GET    /jobs/{id}/source         302 -> presigned B2 source.mp4 (1h)
 GET    /jobs/{id}/manifest       302 -> presigned manifest.json
