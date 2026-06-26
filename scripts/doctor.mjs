@@ -43,6 +43,8 @@ const REQUIRED_PYTHON_MINOR = 11; // 3.11+
 // and PLACEHOLDER_VALUES.
 const STANDARD_B2_KEY_ID = "B2_APPLICATION_KEY_ID";
 const LEGACY_B2_KEY_ID = "B2_KEY_ID";
+const LEGACY_B2_KEY_ID_SUNSET = "2026-07-31";
+const B2_REGION_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const REQUIRED_B2_VARS = [
   "B2_REGION",
   "B2_APPLICATION_KEY",
@@ -253,10 +255,17 @@ function checkEnv() {
       "Edit .env and replace placeholders with your real B2 credentials (https://secure.backblaze.com/app_keys.htm?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=video-to-insights-pipeline)",
     );
   }
+  const region = env.B2_REGION;
+  if (region && (region.trim() !== region || !B2_REGION_RE.test(region))) {
+    fail(
+      "B2_REGION contains invalid characters",
+      "Use the region code from your bucket, e.g. `us-west-004`; do not include URLs, slashes, ports, query strings, fragments, or whitespace",
+    );
+  }
   if (!env[STANDARD_B2_KEY_ID] && env[LEGACY_B2_KEY_ID]) {
     warn(
       `${LEGACY_B2_KEY_ID} is being used as a temporary migration fallback`,
-      `add ${STANDARD_B2_KEY_ID} before removing legacy B2 variables after old processes drain`,
+      `add ${STANDARD_B2_KEY_ID} before removing legacy B2 variables after old processes drain; fallback sunset: ${LEGACY_B2_KEY_ID_SUNSET}`,
     );
   }
   // Soft signal: graceful degradation lets the pipeline run without

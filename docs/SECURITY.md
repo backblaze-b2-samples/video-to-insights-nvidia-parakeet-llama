@@ -47,7 +47,8 @@ URLs — only B2 keys. URLs are minted on demand by `/jobs/{id}/source`
 - During the one-release env migration, `B2_KEY_ID` is accepted only as
   a fallback when `B2_APPLICATION_KEY_ID` is absent. Keep `B2_ENDPOINT`
   for old processes during rolling deploys, then remove both old vars
-  after every old process has drained.
+  after every old process has drained. The fallback is tracked for
+  removal after 2026-07-31 in `docs/exec-plans/tech-debt-tracker.md`.
 
 ## CORS
 

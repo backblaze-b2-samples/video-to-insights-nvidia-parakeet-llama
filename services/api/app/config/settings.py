@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     # B2_* names and derive the S3 endpoint from the configured region.
     b2_application_key_id: str = Field(
         "",
+        # Sunset: remove B2_KEY_ID fallback after 2026-07-31.
+        # Tracked in docs/exec-plans/tech-debt-tracker.md.
         validation_alias=AliasChoices("B2_APPLICATION_KEY_ID", "B2_KEY_ID"),
     )
     b2_region: str = ""

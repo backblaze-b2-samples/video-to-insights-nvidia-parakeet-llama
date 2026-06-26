@@ -27,8 +27,13 @@ def test_b2_public_url_base_defaults_to_empty(monkeypatch):
     [
         "attacker.example:443/x",
         "evil.com:443#frag",
+        "us-west-004.backblazeb2.com@b2-collector.example/",
         "evil%2fhost",
         "evil@host",
+        "us-test-001?bucket=x",
+        "us-test-001#frag",
+        "us-test-001:443",
+        "us test 001",
         " ",
         "us-test-001/path",
     ],

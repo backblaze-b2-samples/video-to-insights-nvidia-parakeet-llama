@@ -2,7 +2,7 @@
 
 The real subprocess call lives in `pipeline.py` (wrapped in
 `asyncio.to_thread`) — this module is intentionally side-effect-free so
-it stays trivial to unit-test without ffmpeg/yt-dlp on PATH.
+it stays trivial to unit-test without ffmpeg or the yt-dlp module.
 """
 
 from urllib.parse import urlparse

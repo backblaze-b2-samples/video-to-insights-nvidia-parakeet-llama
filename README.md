@@ -75,7 +75,7 @@ playback — no clip slicing, just `currentTime` + HTTP Range.
 Prereqs:
 - Node.js ≥ 20, pnpm ≥ 9, Python ≥ 3.11
 - `ffmpeg` and `ffprobe` on PATH (`brew install ffmpeg` on macOS, `apt-get install ffmpeg` on Debian/Ubuntu)
-- `yt-dlp` on PATH (`pip install --upgrade yt-dlp` or `brew install yt-dlp`)
+- `yt-dlp` installed in the API Python environment (handled by `pip install -r requirements.txt` below)
 - A free **[Backblaze B2 account](https://www.backblaze.com/sign-up/ai-cloud-storage?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=video-to-insights-pipeline)**
 - (Optional) A free **[NVIDIA NIM API key](https://build.nvidia.com/)** if you want transcription and insights
 
@@ -105,7 +105,7 @@ pnpm dev
 
 Frontend at `localhost:3000`, API at `localhost:8000`. `pnpm dev` runs
 `pnpm doctor` first to surface the common setup gotchas (wrong Node /
-Python, missing `ffmpeg`/`yt-dlp`, placeholder `.env`).
+Python, missing `ffmpeg` or backend `yt-dlp` module, placeholder `.env`).
 
 ## Environment variables
 
@@ -128,7 +128,8 @@ Rolling migration note: for one deploy window, the API accepts
 `B2_KEY_ID` only when `B2_APPLICATION_KEY_ID` is absent. When rolling from
 the older env contract, add the standard variables while keeping
 `B2_KEY_ID` and `B2_ENDPOINT` available for old processes; remove the old
-variables only after every old process has drained.
+variables only after every old process has drained. The fallback is tracked
+for removal after 2026-07-31 in `docs/exec-plans/tech-debt-tracker.md`.
 
 ## API
 

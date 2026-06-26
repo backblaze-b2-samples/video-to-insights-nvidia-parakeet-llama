@@ -133,7 +133,8 @@ The S3 endpoint is derived from `B2_REGION`; credentials use the standard
 vars. `B2_PUBLIC_URL_BASE` is reserved for standard compatibility; this
 app currently serves browser-facing artifacts through presigned URLs.
 During the one-release env migration, `B2_KEY_ID` is accepted only as a
-fallback when `B2_APPLICATION_KEY_ID` is absent.
+fallback when `B2_APPLICATION_KEY_ID` is absent. Remove that fallback after
+2026-07-31 per `docs/exec-plans/tech-debt-tracker.md`.
 
 ## Trust Boundaries
 

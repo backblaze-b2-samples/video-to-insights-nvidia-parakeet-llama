@@ -23,7 +23,8 @@ Bring the sample into the current B2 standards:
 ## Review fixes
 
 - Added strict `B2_REGION` validation before deriving the S3 endpoint.
+- Mirrored the same region validation in `scripts/doctor.mjs`.
 - Added a one-release `B2_KEY_ID` fallback for rolling deploys, with the
-  standard env var taking precedence.
+  standard env var taking precedence and removal tracked after 2026-07-31.
 - Documented `B2_PUBLIC_URL_BASE` as reserved/currently unused by this app.
 - Added repo-boundary coverage for `get_s3_client()`.

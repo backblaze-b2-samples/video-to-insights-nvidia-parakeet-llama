@@ -10,8 +10,8 @@ pnpm dev:api        # backend only (uvicorn --workers 1)
 ```
 
 `pnpm dev` runs `pnpm doctor` first to catch the usual environment
-issues (wrong Node / Python, missing `ffmpeg` / `yt-dlp`, placeholder
-`.env`, busy port 3000).
+issues (wrong Node / Python, missing `ffmpeg` or backend `yt-dlp`
+module, placeholder `.env`, busy port 3000).
 
 ## Testing
 
@@ -31,7 +31,7 @@ Tests must not touch real B2 or NVIDIA. Patterns:
 - NVIDIA — mount an `httpx.MockTransport` and pass it via the
   `transport=` parameter on `asr.transcribe_chunks` /
   `insights.extract_insights`.
-- yt-dlp / ffmpeg / ffprobe — `tests/test_pipeline.py` swaps them out
+- yt-dlp module / ffmpeg / ffprobe — `tests/test_pipeline.py` swaps them out
   via `PipelineDeps`. `tests/test_ffmpeg_audio.py` exercises the real
   binaries but is `pytest.skipif`-gated on their presence.
 

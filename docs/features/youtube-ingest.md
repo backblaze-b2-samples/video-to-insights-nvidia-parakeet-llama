@@ -28,14 +28,16 @@ Reject codes:
 
 ## Download
 
-`app/service/downloader.py::default_download` shells out to `yt-dlp`:
+`app/service/downloader.py::default_download` shells out through the API
+Python interpreter, so `yt-dlp` must be installed in the backend
+environment:
 
 ```
-yt-dlp --no-playlist --restrict-filenames \
-       -f "mp4/bestvideo*+bestaudio/best" \
-       --merge-output-format mp4 \
-       -o {WORK_DIR}/{video_id}/source.mp4 \
-       {URL}
+python -m yt_dlp --no-playlist --restrict-filenames \
+                 -f "mp4/bestvideo*+bestaudio/best" \
+                 --merge-output-format mp4 \
+                 -o {WORK_DIR}/{video_id}/source.mp4 \
+                 {URL}
 ```
 
 The orchestrator in `app/service/pipeline.py` wraps every invocation in
@@ -50,7 +52,7 @@ The orchestrator in `app/service/pipeline.py` wraps every invocation in
 | Geo-blocked | `yt_dlp_geo_blocked` |
 | Anything else from yt-dlp | `yt_dlp_failed` |
 | Duration > `MAX_VIDEO_SECONDS` | `video_too_long` |
-| yt-dlp not on PATH | `yt_dlp_failed` (with hint) |
+| yt-dlp missing from the API Python env | `yt_dlp_failed` (with hint) |
 | `ffprobe` failure | `ffprobe_failed` |
 
 Classification lives in `app/service/downloader.py::classify_yt_dlp_error`
