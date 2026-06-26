@@ -82,7 +82,7 @@ async def _download_and_probe(
         stages.fail(status, e.code, e.message)
         return None
     except FileNotFoundError as e:
-        stages.fail(status, "yt_dlp_failed", f"yt-dlp module unavailable: {e}")
+        stages.fail(status, "yt_dlp_failed", f"download executable unavailable: {e}")
         return None
 
     try:
