@@ -42,8 +42,12 @@ URLs — only B2 keys. URLs are minted on demand by `/jobs/{id}/source`
   copy-paste-and-forget never reaches B2 with bad creds.
 - Required keys (`B2_APPLICATION_KEY_ID`, `B2_APPLICATION_KEY`,
   `B2_BUCKET_NAME`, `B2_REGION`) match the current B2 sample standard
-  exactly. `B2_PUBLIC_URL_BASE` is optional; private buckets use
-  presigned URLs. No aliases.
+  exactly. `B2_PUBLIC_URL_BASE` is reserved for standard compatibility;
+  private buckets use presigned URLs.
+- During the one-release env migration, `B2_KEY_ID` is accepted only as
+  a fallback when `B2_APPLICATION_KEY_ID` is absent. Keep `B2_ENDPOINT`
+  for old processes during rolling deploys, then remove both old vars
+  after every old process has drained.
 
 ## CORS
 

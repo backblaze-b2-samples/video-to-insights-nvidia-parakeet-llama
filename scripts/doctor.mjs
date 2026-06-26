@@ -41,14 +41,16 @@ const REQUIRED_PYTHON_MINOR = 11; // 3.11+
 // Required B2 env vars + the exact placeholder strings shipped in
 // .env.example. Keep in sync with services/api/main.py REQUIRED_B2_SETTINGS
 // and PLACEHOLDER_VALUES.
+const STANDARD_B2_KEY_ID = "B2_APPLICATION_KEY_ID";
+const LEGACY_B2_KEY_ID = "B2_KEY_ID";
 const REQUIRED_B2_VARS = [
-  "B2_APPLICATION_KEY_ID",
   "B2_REGION",
   "B2_APPLICATION_KEY",
   "B2_BUCKET_NAME",
 ];
 const PLACEHOLDERS = new Set([
   "your_application_key_id",
+  "your_key_id",
   "your_b2_region",
   "your_application_key",
   "your-bucket-name",
@@ -229,19 +231,32 @@ function checkEnv() {
   }
   const env = parseEnvFile(ENV_FILE);
   const missing = REQUIRED_B2_VARS.filter((k) => !env[k]);
+  if (!env[STANDARD_B2_KEY_ID] && !env[LEGACY_B2_KEY_ID]) {
+    missing.unshift(`${STANDARD_B2_KEY_ID} (or ${LEGACY_B2_KEY_ID} during rollout)`);
+  }
   if (missing.length > 0) {
     fail(
       `.env is missing required B2 variables: ${missing.join(", ")}`,
       "See .env.example for the full list and edit .env to add them",
     );
   }
-  const placeholders = REQUIRED_B2_VARS.filter(
+  const placeholders = [
+    STANDARD_B2_KEY_ID,
+    LEGACY_B2_KEY_ID,
+    ...REQUIRED_B2_VARS,
+  ].filter(
     (k) => env[k] && PLACEHOLDERS.has(env[k]),
   );
   if (placeholders.length > 0) {
     fail(
       `.env still has placeholder values: ${placeholders.join(", ")}`,
       "Edit .env and replace placeholders with your real B2 credentials (https://secure.backblaze.com/app_keys.htm?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=video-to-insights-pipeline)",
+    );
+  }
+  if (!env[STANDARD_B2_KEY_ID] && env[LEGACY_B2_KEY_ID]) {
+    warn(
+      `${LEGACY_B2_KEY_ID} is being used as a temporary migration fallback`,
+      `add ${STANDARD_B2_KEY_ID} before removing legacy B2 variables after old processes drain`,
     );
   }
   // Soft signal: graceful degradation lets the pipeline run without

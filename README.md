@@ -115,7 +115,7 @@ Python, missing `ffmpeg`/`yt-dlp`, placeholder `.env`).
 | `B2_APPLICATION_KEY` | yes | B2 application key |
 | `B2_BUCKET_NAME` | yes | Bucket the sample writes into |
 | `B2_REGION` | yes | e.g. `us-west-004`. The API derives the S3 endpoint from this. |
-| `B2_PUBLIC_URL_BASE` | no | Optional public bucket/CDN base. Private buckets use presigned URLs. |
+| `B2_PUBLIC_URL_BASE` | no | Reserved for standard compatibility; current artifact URLs are presigned. |
 | `NVIDIA_API_KEY` | no | When unset, pipeline finishes with `done_no_analysis` |
 | `NVIDIA_ASR_MODEL` | no | Default `nvidia/parakeet-tdt-0.6b-v2` |
 | `NVIDIA_INSIGHTS_MODEL` | no | Default `meta/llama-3.3-70b-instruct` |
@@ -123,6 +123,12 @@ Python, missing `ffmpeg`/`yt-dlp`, placeholder `.env`).
 | `MAX_VIDEO_SECONDS` | no | Reject videos longer than this. Default `5400` |
 | `MAX_CONCURRENT_JOBS` | no | Lifespan semaphore. Default `1` |
 | `ALLOWED_VIDEO_HOSTS` | no | Comma-separated host allowlist |
+
+Rolling migration note: for one deploy window, the API accepts
+`B2_KEY_ID` only when `B2_APPLICATION_KEY_ID` is absent. When rolling from
+the older env contract, add the standard variables while keeping
+`B2_KEY_ID` and `B2_ENDPOINT` available for old processes; remove the old
+variables only after every old process has drained.
 
 ## API
 

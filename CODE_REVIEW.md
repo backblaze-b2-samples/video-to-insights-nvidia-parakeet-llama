@@ -19,7 +19,8 @@ every PR.
 4. **No new env-var aliases.** The keys are `B2_APPLICATION_KEY_ID`,
    `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`, `B2_REGION`, and optional
    `B2_PUBLIC_URL_BASE` per the current B2 sample standard. Do not add
-   provider-specific aliases or rename these per sample.
+   provider-specific aliases or rename these per sample. The temporary
+   `B2_KEY_ID` fallback is for one rolling-deploy migration window only.
 5. **Custom S3 user-agent string is fixed.**
    `user_agent_extra = "video-to-insights-pipeline/0.1.0 (backblaze-b2-samples)"`
    in `app/repo/b2_client.py`. Don't change the slug.

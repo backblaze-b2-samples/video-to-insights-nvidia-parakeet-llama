@@ -19,3 +19,11 @@ Bring the sample into the current B2 standards:
 2. Kept the existing boto3 S3 client and custom user-agent behavior intact.
 3. Updated `.env.example`, local doctor checks, tests, and user docs.
 4. Ran lint, backend tests, structure checks, and a B2 standards scan.
+
+## Review fixes
+
+- Added strict `B2_REGION` validation before deriving the S3 endpoint.
+- Added a one-release `B2_KEY_ID` fallback for rolling deploys, with the
+  standard env var taking precedence.
+- Documented `B2_PUBLIC_URL_BASE` as reserved/currently unused by this app.
+- Added repo-boundary coverage for `get_s3_client()`.
