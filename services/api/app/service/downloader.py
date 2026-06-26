@@ -19,6 +19,12 @@ class YtDlpError(RuntimeError):
         super().__init__(message)
 
 
+YTDLP_MISSING_HINT = (
+    "yt-dlp is not installed in the API Python environment. "
+    "Run `cd services/api && .venv/bin/pip install -r requirements.txt`."
+)
+
+
 def classify_yt_dlp_error(stderr_lower: str) -> str:
     """Map yt-dlp's stderr to a stable error code the README documents."""
     if "private" in stderr_lower or "sign in to confirm" in stderr_lower:
@@ -28,6 +34,12 @@ def classify_yt_dlp_error(stderr_lower: str) -> str:
     if "geo" in stderr_lower or "not available in your country" in stderr_lower:
         return "yt_dlp_geo_blocked"
     return "yt_dlp_failed"
+
+
+def _yt_dlp_failure_message(stderr: str) -> str:
+    if "no module named" in stderr.lower() and "yt_dlp" in stderr.lower():
+        return YTDLP_MISSING_HINT
+    return stderr.splitlines()[-1] if stderr else "yt-dlp exited non-zero"
 
 
 def default_download(url: str, out_path: str) -> dict[str, Any]:
@@ -52,6 +64,6 @@ def default_download(url: str, out_path: str) -> dict[str, Any]:
     result = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if result.returncode != 0:
         stderr = (result.stderr or "").strip()
-        msg = stderr.splitlines()[-1] if stderr else "yt-dlp exited non-zero"
+        msg = _yt_dlp_failure_message(stderr)
         raise YtDlpError(classify_yt_dlp_error(stderr.lower()), msg)
     return {"path": out_path}

@@ -16,9 +16,12 @@ every PR.
 3. **No `boto3` or `botocore` imports outside `app/repo/`.** Enforced by
    `tests/test_structure.py::test_boto3_only_in_repo` — if the test is
    green, this rule is satisfied.
-4. **No new env-var aliases.** The keys are `B2_ENDPOINT`, `B2_REGION`,
-   `B2_KEY_ID`, `B2_APPLICATION_KEY`, `B2_BUCKET_NAME` per the parent
-   `sampleapps/CLAUDE.md`. No `AWS_*`, no `B2_S3_*`, no rename-per-sample.
+4. **No new env-var aliases.** The keys are `B2_APPLICATION_KEY_ID`,
+   `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`, `B2_REGION`, and optional
+   `B2_PUBLIC_URL_BASE` per the current B2 sample standard. Do not add
+   provider-specific aliases or rename these per sample. The temporary
+   `B2_KEY_ID` fallback is tracked for removal after 2026-07-31 in
+   `docs/exec-plans/tech-debt-tracker.md`.
 5. **Custom S3 user-agent string is fixed.**
    `user_agent_extra = "video-to-insights-pipeline/0.1.0 (backblaze-b2-samples)"`
    in `app/repo/b2_client.py`. Don't change the slug.

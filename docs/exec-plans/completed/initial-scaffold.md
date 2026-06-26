@@ -26,11 +26,11 @@ The sample demonstrates: (a) B2 as the system of record for large media + AI-der
 | Monorepo layout (`apps/web` + `services/api` + `packages/shared`) | Generic file-upload UI (dashboard, upload page, files page) | Single `/` page: paste-URL form + result card with video player + insight cards |
 | Next.js 16 App Router, Tailwind v4, shadcn/ui, TanStack Query | `dashboard/`, `files/`, `settings/`, `design/` route trees | `/jobs/{id}` is the status resource; UI polls it via TanStack Query |
 | FastAPI layering: types → config → repo → service → runtime, structural test enforced | `app/runtime/upload.py`, `app/service/upload.py`, `app/service/metadata.py` (multipart file upload) | `app/service/youtube.py` (yt-dlp), `app/service/ffmpeg_audio.py` (extract + chunk audio), `app/service/asr.py` (NVIDIA Parakeet), `app/service/insights.py` (NVIDIA Llama-3.3), `app/service/pipeline.py` (orchestrator), `app/runtime/jobs.py` |
-| `app/repo/b2_client.py` (boto3 S3 with custom user-agent — pattern only) | The `b2ai-oss-start` user-agent string and the `B2_S3_ENDPOINT` / `B2_APPLICATION_KEY_ID` env-var names (these drift from parent CLAUDE.md and must be replaced) | `app/repo/b2_client.py` with user-agent `video-to-insights-pipeline/0.1.0 (backblaze-b2-samples)`; env vars `B2_ENDPOINT` / `B2_REGION` / `B2_KEY_ID` / `B2_APPLICATION_KEY` / `B2_BUCKET_NAME` per parent CLAUDE.md |
+| `app/repo/b2_client.py` (boto3 S3 with custom user-agent — pattern only) | The `b2ai-oss-start` user-agent string and legacy endpoint/key-id env-var aliases | `app/repo/b2_client.py` with user-agent `video-to-insights-pipeline/0.1.0 (backblaze-b2-samples)`; env vars `B2_APPLICATION_KEY_ID` / `B2_APPLICATION_KEY` / `B2_BUCKET_NAME` / `B2_REGION` plus optional `B2_PUBLIC_URL_BASE` |
 | Structured JSON logging, CORS, lifespan setup pattern from `main.py` | The placeholder file metadata extraction (PIL EXIF, PDF page count) | `app/repo/job_state.py` — atomic file-per-job state (`work_dir/jobs/{job_id}.json` via tmp+rename); no in-memory dict, no asyncio.Lock |
 | pytest + ruff + structural test (`tests/test_structure.py`) | All `tests/test_upload_*`, `test_delete*`, `test_download_*`, `test_metadata*` | `tests/test_youtube_validate.py`, `tests/test_ffmpeg_audio.py`, `tests/test_asr_client.py` (with fake NIM client), `tests/test_insights_client.py`, `tests/test_pipeline.py` (faked downloader + fake S3 + fake NIM), `tests/test_job_state.py` |
-| `pnpm dev` / `pnpm dev:api` / `pnpm dev:web` workflow | `infra/railway/` deploy config (out of scope) | `scripts/doctor.mjs` (checks ffmpeg + yt-dlp on PATH, warns if NVIDIA_API_KEY missing) wired to `pnpm doctor` |
-| LICENSE (Apache 2.0), pre-commit hooks, pnpm workspace | Vibe starter README content | New README covering pipeline diagram, env setup (brew/apt for ffmpeg, pip install for yt-dlp), graceful-degradation behavior, free-tier model notes, YouTube ToS disclaimer |
+| `pnpm dev` / `pnpm dev:api` / `pnpm dev:web` workflow | `infra/railway/` deploy config (out of scope) | `scripts/doctor.mjs` (checks ffmpeg on PATH + yt-dlp import in the API env, warns if NVIDIA_API_KEY missing) wired to `pnpm doctor` |
+| LICENSE (Apache 2.0), pre-commit hooks, pnpm workspace | Vibe starter README content | New README covering pipeline diagram, env setup (brew/apt for ffmpeg, backend pip install for yt-dlp), graceful-degradation behavior, free-tier model notes, YouTube ToS disclaimer |
 | Frontend `apiFetch` + TanStack `qk` query-key conventions | Dashboard panels (`StatsCards`, `RecentUploadsTable`, `UploadChart`) | Job detail components plus B2-index-backed dashboard components (`RecentVideosTable`, `StatsCards`, `ActivityChart`, `LastProcessedCard`) |
 | `packages/shared` for TS↔Python type mirror | — | New shared types: `SubmitRequest`, `JobStatus`, `ManifestV1`, `Insight` |
 | | | **No Docker.** Explicit user decision — keep dev simple, devs use local Python + Node. |
@@ -39,7 +39,7 @@ The sample demonstrates: (a) B2 as the system of record for large media + AI-der
 
 ## 3. B2 surface (S3-only, per parent CLAUDE.md)
 
-Per the parent CLAUDE.md, the sample uses the S3-compatible API exclusively via `boto3`. No b2-native API usage.
+Per the parent CLAUDE.md, the sample uses the S3-compatible API exclusively via `boto3`. It does not use the native B2 API.
 
 S3 operations exercised:
 - `PutObject` — upload `source.mp4`, `transcript.json`, `insights.json`, `manifest.json`
@@ -80,7 +80,7 @@ Rewrite (keep filename, replace contents to match new architecture):
 - `AGENTS.md` — same control-surface header, but doc-read order points at the new feature files; commands section reflects the new layout (`pnpm doctor`, smoke test recipe).
 - `ARCHITECTURE.md` — replace the upload/download diagram with the new pipeline; layer table unchanged; structural-test contract unchanged.
 - `CLAUDE.md` — top-of-tree onboarding doc; doc-read order, test commands, diff discipline. Slug + scope updated.
-- `.env.example` — parent-CLAUDE.md mandated names (`B2_ENDPOINT`, `B2_REGION`, `B2_KEY_ID`, `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`) + sample-specific `NVIDIA_API_KEY`, `NVIDIA_ASR_MODEL`, `NVIDIA_INSIGHTS_MODEL`, `WORK_DIR`, `MAX_VIDEO_SECONDS`, `MAX_CONCURRENT_JOBS`, `ALLOWED_VIDEO_HOSTS`.
+- `.env.example` — current B2 sample standard names (`B2_APPLICATION_KEY_ID`, `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`, `B2_REGION`, optional `B2_PUBLIC_URL_BASE`) + sample-specific `NVIDIA_API_KEY`, `NVIDIA_ASR_MODEL`, `NVIDIA_INSIGHTS_MODEL`, `WORK_DIR`, `MAX_VIDEO_SECONDS`, `MAX_CONCURRENT_JOBS`, `ALLOWED_VIDEO_HOSTS`.
 - `CODE_REVIEW.md` — keep the structure; rules updated to ban `subprocess.run` outside `app/service/` and to require `asyncio.to_thread` wrapping in `app/service/pipeline.py`.
 - `package.json` (root + apps/web + services/api as relevant) — name field switches to `video-to-insights-pipeline`. Scripts gain `doctor`.
 - `pyproject.toml` — name, description, dependencies (drop file-upload-only deps if any; add `yt-dlp`, `pydub` only if necessary — prefer pure ffmpeg, `httpx` for NIM calls).
@@ -112,11 +112,12 @@ Move:
 | `package.json` `name` (apps/web) | `@vibe-coding-starter-kit/web` (or starter's exact form) | `@video-to-insights-pipeline/web` |
 | `pyproject.toml` `name` | `vibe-coding-starter-kit-api` (or starter's exact form) | `video-to-insights-pipeline-api` |
 | Custom S3 user-agent string | `b2ai-oss-start` (used as `user_agent_extra`) | `video-to-insights-pipeline/0.1.0 (backblaze-b2-samples)` |
-| B2 env var: endpoint | `B2_S3_ENDPOINT` | `B2_ENDPOINT` |
-| B2 env var: key id | `B2_APPLICATION_KEY_ID` | `B2_KEY_ID` |
-| B2 env var: region | (absent in starter) | `B2_REGION` (added) |
+| B2 endpoint configuration | Legacy explicit endpoint alias | Derived from `B2_REGION` |
+| B2 env var: key id | Starter key-id alias | `B2_APPLICATION_KEY_ID` |
+| B2 env var: region | (absent in starter) | `B2_REGION` |
 | B2 env var: application key | `B2_APPLICATION_KEY` | `B2_APPLICATION_KEY` (unchanged) |
 | B2 env var: bucket | `B2_BUCKET_NAME` | `B2_BUCKET_NAME` (unchanged) |
+| B2 env var: public URL base | (absent in starter) | `B2_PUBLIC_URL_BASE` (optional) |
 | Frontend API base env | `NEXT_PUBLIC_API_URL` | `NEXT_PUBLIC_API_URL` (unchanged) |
 | Top-level B2 object prefix | `b2ai-oss-start/` (if any) | `video-to-insights-pipeline/` |
 | Image / docker tag references | any `vibe-coding-starter-kit:*` | n/a — Docker dropped |
@@ -290,7 +291,7 @@ Builder may either generate this at scaffold time (if ffmpeg is on PATH) or chec
 - **Single-worker constraint:** State file is per-process; multi-worker uvicorn would race. README pins `--workers 1`.
 - **Long videos:** > 22-min audio gets chunked for Parakeet. Stitch logic in `app/service/asr.py` adds chunk-start offsets to returned segment timestamps. Test covers this.
 - **Legal:** README must include a "for content you own / CC / fair-use research" notice and link YouTube ToS. The sample is not a downloader product.
-- **Presigned URL hostname:** `B2_ENDPOINT` must be canonical `s3.<region>.backblazeb2.com`. README warns against CDN aliases.
+- **Presigned URL hostname:** The S3 endpoint is derived from `B2_REGION`; public bucket/CDN hostnames belong in `B2_PUBLIC_URL_BASE`, not in the S3 client endpoint.
 
 ---
 

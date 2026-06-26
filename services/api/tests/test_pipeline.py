@@ -229,6 +229,20 @@ async def test_yt_dlp_error_classified_and_fails_fast(fake_b2, stub_jobs_index):
     assert stub_jobs_index == []
 
 
+async def test_download_executable_missing_fails_fast(fake_b2, stub_jobs_index):
+    deps = _make_deps(fake_b2, download_raises=FileNotFoundError("python missing"))
+    status = new_job(video_id=None, source_url="https://www.youtube.com/watch?v=ok")
+    await run_job(status.job_id, deps=deps)
+
+    final = job_state.read(status.job_id)
+    assert final is not None
+    assert final.status == "failed"
+    assert final.error is not None
+    assert final.error.code == "yt_dlp_failed"
+    assert "download executable unavailable" in final.error.message
+    assert stub_jobs_index == []
+
+
 async def test_workdir_cleaned_in_finally(fake_b2, monkeypatch):
     from app.config import settings
 
