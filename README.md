@@ -111,11 +111,11 @@ Python, missing `ffmpeg`/`yt-dlp`, placeholder `.env`).
 
 | Key | Required | Notes |
 |---|---|---|
-| `B2_ENDPOINT` | yes | `https://s3.<region>.backblazeb2.com` |
-| `B2_REGION` | yes | e.g. `us-west-004`. Derived from your bucket. |
-| `B2_KEY_ID` | yes | B2 application key id |
+| `B2_APPLICATION_KEY_ID` | yes | B2 application key id |
 | `B2_APPLICATION_KEY` | yes | B2 application key |
 | `B2_BUCKET_NAME` | yes | Bucket the sample writes into |
+| `B2_REGION` | yes | e.g. `us-west-004`. The API derives the S3 endpoint from this. |
+| `B2_PUBLIC_URL_BASE` | no | Optional public bucket/CDN base. Private buckets use presigned URLs. |
 | `NVIDIA_API_KEY` | no | When unset, pipeline finishes with `done_no_analysis` |
 | `NVIDIA_ASR_MODEL` | no | Default `nvidia/parakeet-tdt-0.6b-v2` |
 | `NVIDIA_INSIGHTS_MODEL` | no | Default `meta/llama-3.3-70b-instruct` |

@@ -40,9 +40,10 @@ URLs — only B2 keys. URLs are minted on demand by `/jobs/{id}/source`
 - `.env` is gitignored.
 - `.env.example` ships placeholders that the startup check rejects so a
   copy-paste-and-forget never reaches B2 with bad creds.
-- Required keys (`B2_ENDPOINT`, `B2_REGION`, `B2_KEY_ID`,
-  `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`) match the parent
-  `sampleapps/CLAUDE.md` exactly. No aliases.
+- Required keys (`B2_APPLICATION_KEY_ID`, `B2_APPLICATION_KEY`,
+  `B2_BUCKET_NAME`, `B2_REGION`) match the current B2 sample standard
+  exactly. `B2_PUBLIC_URL_BASE` is optional; private buckets use
+  presigned URLs. No aliases.
 
 ## CORS
 

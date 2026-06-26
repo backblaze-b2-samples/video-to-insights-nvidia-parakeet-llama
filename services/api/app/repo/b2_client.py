@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 def get_s3_client():
     return boto3.client(
         "s3",
-        endpoint_url=settings.b2_endpoint,
+        endpoint_url=settings.b2_s3_endpoint_url,
         region_name=settings.b2_region or None,
-        aws_access_key_id=settings.b2_key_id,
+        aws_access_key_id=settings.b2_application_key_id,
         aws_secret_access_key=settings.b2_application_key,
         config=Config(
             signature_version="s3v4",

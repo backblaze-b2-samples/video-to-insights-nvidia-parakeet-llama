@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pytest
 
-os.environ.setdefault("B2_ENDPOINT", "https://s3.test.backblazeb2.com")
+os.environ.setdefault("B2_APPLICATION_KEY_ID", "test-key-id")
 os.environ.setdefault("B2_REGION", "us-test-001")
-os.environ.setdefault("B2_KEY_ID", "test-key-id")
 os.environ.setdefault("B2_APPLICATION_KEY", "test-app-key")
 os.environ.setdefault("B2_BUCKET_NAME", "test-bucket")
+os.environ.setdefault("B2_PUBLIC_URL_BASE", "")
 
 
 @pytest.fixture(autouse=True)

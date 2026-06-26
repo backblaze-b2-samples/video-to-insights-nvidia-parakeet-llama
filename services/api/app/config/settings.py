@@ -2,15 +2,13 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Backblaze B2 (S3-compatible). Names per parent sampleapps/CLAUDE.md —
-    # no AWS_*, no B2_S3_*. Region is derived from the bucket; we keep it
-    # explicit so boto3's signing region is set correctly without inferring
-    # from the endpoint URL.
-    b2_endpoint: str = ""
+    # Backblaze B2 (S3-compatible). Keep the env surface on the standard
+    # B2_* names and derive the S3 endpoint from the configured region.
+    b2_application_key_id: str = ""
     b2_region: str = ""
-    b2_key_id: str = ""
     b2_application_key: str = ""
     b2_bucket_name: str = ""
+    b2_public_url_base: str = ""
 
     # NVIDIA NIM (free tier). When NVIDIA_API_KEY is empty the pipeline
     # short-circuits the analysis stages and the job finishes as
@@ -33,7 +31,17 @@ class Settings(BaseSettings):
     api_cors_origins: str = "http://localhost:3000,http://localhost:3001"
     api_cors_origin_regex: str = ""
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
+
+    @property
+    def b2_s3_endpoint_url(self) -> str:
+        if not self.b2_region:
+            return ""
+        return f"https://s3.{self.b2_region.strip()}.backblazeb2.com"
 
     @property
     def cors_origins(self) -> list[str]:
