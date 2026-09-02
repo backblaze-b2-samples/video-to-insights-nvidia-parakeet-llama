@@ -35,7 +35,7 @@ Job state is stored under `${WORK_DIR}/jobs` as one JSON file per job.
 Job IDs are validated as UUID hex strings before they are used in paths.
 The resolved state-file path must remain directly under `${WORK_DIR}/jobs`,
 so traversal strings and absolute-path input are rejected before any
-filesystem read or write happens.
+state-file read or write happens.
 
 ## Presigned URL expiry
 

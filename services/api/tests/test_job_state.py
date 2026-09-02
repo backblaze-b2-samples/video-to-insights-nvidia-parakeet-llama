@@ -66,14 +66,14 @@ def test_write_updates_updated_at(tmp_path):
 
 def test_read_rejects_path_traversal(tmp_path):
     outside = tmp_path / "outside.json"
-    outside.write_text('{"job_id": "outside"}')
+    outside.write_text(_make("outside").model_dump_json())
 
     assert job_state.read("../outside") is None
 
 
 def test_read_rejects_absolute_path(tmp_path):
     outside = tmp_path / "outside.json"
-    outside.write_text('{"job_id": "outside"}')
+    outside.write_text(_make("outside").model_dump_json())
 
     assert job_state.read(str(outside.with_suffix(""))) is None
 
