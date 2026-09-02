@@ -51,3 +51,11 @@ Dashboard components read `GET /jobs` through `useJobsIndex` for the
 recent videos table, stats, and activity chart. The "last processed"
 card reads `GET /jobs/latest` through `useLatestJob`. Both endpoints are
 backed by the B2 object `video-to-insights-pipeline/jobs-index.json`.
+
+## Files preview
+
+The files browser opens source videos and JSON artifacts in a preview
+dialog. Each dialog open clears the previous preview state before
+requesting a fresh presigned URL or JSON body, so reopening the same B2
+key shows a loading state instead of briefly rendering an expired URL or
+stale content.

@@ -24,6 +24,23 @@ interface FilePreviewProps {
 //           is short-lived but we fetch the body synchronously to render
 //           it without bouncing the user to a new tab.
 export function FilePreview({ file, open, onOpenChange }: FilePreviewProps) {
+  if (!file) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="truncate font-mono text-sm">
+            {file.key}
+          </DialogTitle>
+        </DialogHeader>
+        {open ? <FilePreviewContent file={file} /> : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FilePreviewContent({ file }: { file: FileObject }) {
   const [preview, setPreview] = useState<{
     error: string | null;
     jsonBody: string | null;
@@ -32,7 +49,6 @@ export function FilePreview({ file, open, onOpenChange }: FilePreviewProps) {
   } | null>(null);
 
   useEffect(() => {
-    if (!file || !open) return;
     const activeKey = file.key;
     let cancelled = false;
     (async () => {
@@ -83,49 +99,40 @@ export function FilePreview({ file, open, onOpenChange }: FilePreviewProps) {
     return () => {
       cancelled = true;
     };
-  }, [file, open]);
-
-  if (!file) return null;
+  }, [file]);
 
   const isVideo = file.kind === "source";
-  const activePreview = open && preview?.key === file.key ? preview : null;
+  const activePreview = preview?.key === file.key ? preview : null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="truncate font-mono text-sm">
-            {file.key}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
-          <div className="rounded-lg border bg-muted/30 min-h-[200px] overflow-hidden">
-            {activePreview?.error ? (
-              <div className="text-center text-muted-foreground p-8">
-                <p className="text-sm">Preview failed</p>
-                <p className="text-xs mt-1">{activePreview.error}</p>
-              </div>
-            ) : isVideo && activePreview?.previewUrl ? (
-              <video
-                controls
-                playsInline
-                preload="metadata"
-                className="w-full max-h-[60vh] rounded"
-                src={activePreview.previewUrl}
-              >
-                Your browser does not support the video tag.
-              </video>
-            ) : !isVideo && activePreview?.jsonBody !== null && activePreview?.jsonBody !== undefined ? (
-              <pre className="max-h-[60vh] overflow-auto p-4 text-xs font-mono leading-relaxed">
-                {activePreview.jsonBody}
-              </pre>
-            ) : (
-              <Skeleton className="h-48 w-full m-4" />
-            )}
+    <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
+      <div className="rounded-lg border bg-muted/30 min-h-[200px] overflow-hidden">
+        {activePreview?.error ? (
+          <div className="text-center text-muted-foreground p-8">
+            <p className="text-sm">Preview failed</p>
+            <p className="text-xs mt-1">{activePreview.error}</p>
           </div>
-          <FileMetadataPanel file={file} />
-        </div>
-      </DialogContent>
-    </Dialog>
+        ) : isVideo && activePreview?.previewUrl ? (
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full max-h-[60vh] rounded"
+            src={activePreview.previewUrl}
+          >
+            Your browser does not support the video tag.
+          </video>
+        ) : !isVideo &&
+          activePreview?.jsonBody !== null &&
+          activePreview?.jsonBody !== undefined ? (
+          <pre className="max-h-[60vh] overflow-auto p-4 text-xs font-mono leading-relaxed">
+            {activePreview.jsonBody}
+          </pre>
+        ) : (
+          <Skeleton className="h-48 w-full m-4" />
+        )}
+      </div>
+      <FileMetadataPanel file={file} />
+    </div>
   );
 }
