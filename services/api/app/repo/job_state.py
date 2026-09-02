@@ -15,6 +15,7 @@ import contextlib
 import json
 import os
 import tempfile
+import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -28,8 +29,20 @@ def _jobs_dir() -> Path:
     return d
 
 
+def _safe_job_id(job_id: str) -> str:
+    try:
+        parsed = uuid.UUID(hex=job_id)
+    except ValueError as e:
+        raise ValueError("invalid job_id") from e
+    return parsed.hex
+
+
 def _path_for(job_id: str) -> Path:
-    return _jobs_dir() / f"{job_id}.json"
+    jobs_dir = _jobs_dir().resolve()
+    path = (jobs_dir / f"{_safe_job_id(job_id)}.json").resolve()
+    if path.parent != jobs_dir:
+        raise ValueError("invalid job path")
+    return path
 
 
 def write(status: JobStatus) -> None:
@@ -77,7 +90,11 @@ def read(job_id: str) -> JobStatus | None:
     through tmp+rename, but if a JSON decode does fail we return None
     rather than blowing up the runtime — the caller surfaces 404.
     """
-    return _read_path(_path_for(job_id))
+    try:
+        path = _path_for(job_id)
+    except ValueError:
+        return None
+    return _read_path(path)
 
 
 def request_cancel(job_id: str) -> JobStatus | None:

@@ -29,6 +29,14 @@ The user-supplied URL is the only piece of untrusted data that ever
 reaches `subprocess`, and it lands as a separate `argv` entry to
 `yt-dlp` — never concatenated into a shell string.
 
+## Job state paths
+
+Job state is stored under `${WORK_DIR}/jobs` as one JSON file per job.
+Job IDs are validated as UUID hex strings before they are used in paths.
+The resolved state-file path must remain directly under `${WORK_DIR}/jobs`,
+so traversal strings and absolute-path input are rejected before any
+filesystem read or write happens.
+
 ## Presigned URL expiry
 
 All presigned URLs use `ExpiresIn=3600` (1h). State files never store
