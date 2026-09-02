@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Copy,
   Eye,
@@ -185,32 +185,30 @@ export function FileBrowser() {
   const { data, isLoading, isFetching, error, refetch } = useFiles();
   const files = useMemo(() => data?.objects ?? [], [data]);
 
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string> | null>(null);
   const [previewFile, setPreviewFile] = useState<FileObject | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const tree = useMemo(() => buildFileTree(files), [files]);
-
-  // Auto-expand on first arrival; preserve user's manual toggles after.
-  useEffect(() => {
-    if (files.length === 0) return;
-    setExpanded((prev) => {
-      if (prev.size > 0) return prev;
-      const topFolders = tree
-        .filter((n): n is TreeFolder => n.type === "folder")
-        .map((f) => f.path);
-      return new Set(topFolders);
-    });
-  }, [files.length, tree]);
+  const defaultExpanded = useMemo(
+    () =>
+      new Set(
+        tree
+          .filter((n): n is TreeFolder => n.type === "folder")
+          .map((f) => f.path),
+      ),
+    [tree],
+  );
+  const visibleExpanded = expanded ?? defaultExpanded;
 
   const toggleFolder = useCallback((path: string) => {
     setExpanded((prev) => {
-      const next = new Set(prev);
+      const next = new Set(prev ?? defaultExpanded);
       if (next.has(path)) next.delete(path);
       else next.add(path);
       return next;
     });
-  }, []);
+  }, [defaultExpanded]);
 
   const handleOpenInTab = async (file: FileObject) => {
     try {
@@ -280,7 +278,7 @@ export function FileBrowser() {
                   key={node.type === "folder" ? node.path : node.data.key}
                   node={node}
                   depth={0}
-                  expanded={expanded}
+                  expanded={visibleExpanded}
                   onToggle={toggleFolder}
                   onPreview={handlePreview}
                   onOpen={handleOpenInTab}
