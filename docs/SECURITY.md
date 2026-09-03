@@ -57,6 +57,14 @@ deploys MUST override with the exact frontend origin. The
 `API_CORS_ORIGIN_REGEX` escape hatch is wired by `scripts/dev.sh` for
 dev only — never set it in production.
 
+## Dependency security maintenance
+
+The frontend workspace pins Next.js and `eslint-config-next` together, and the
+root workspace uses `pnpm.overrides` for vulnerable transitive npm packages
+that are otherwise pulled in through developer tooling. Keep those overrides at
+or above the patched versions listed in Dependabot alerts when refreshing
+`pnpm-lock.yaml`.
+
 ## What's intentionally out of scope
 
 - **Auth.** This is an internal-tool sample. There is no user model and
